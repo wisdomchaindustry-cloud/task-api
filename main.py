@@ -15,6 +15,10 @@ def validation_exception_handler(request: Request, exc: RequestValidationError):
 class TaskCreate(BaseModel):
     title: str
 
+class TaskUpdate(BaseModel):
+    title: str
+    done: bool
+
 tasks = [
     {"id": 1, "title": "Buy milk", "done": False},
     {"id": 2, "title": "Walk the dog", "done": False},
@@ -56,3 +60,28 @@ def create_task(task: TaskCreate):
     new_task = {"id": new_id, "title": task.title, "done": False}
     tasks.append(new_task)
     return new_task
+
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, task: TaskUpdate):
+    if not task.title.strip():
+        return JSONResponse(
+            status_code=400,
+            content={"error": "title is required"}
+        )
+
+    for t in tasks:
+        if t["id"] == task_id:
+            t["title"] = task.title
+            t["done"] = task.done
+            return t
+
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+@app.delete("/tasks/{task_id}", status_code=204)
+def delete_task(task_id: int):
+    for t in tasks:
+        if t["id"] == task_id:
+            tasks.remove(t)
+            return
+
+    raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
