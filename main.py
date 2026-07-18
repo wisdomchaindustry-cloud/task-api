@@ -25,7 +25,7 @@ tasks = [
     {"id": 3, "title": "Read a book", "done": False}
 ]
 
-@app.get("/")
+@app.get("/", summary="API info", description="Returns basic info about this API")
 def root():
     return {
         "name": "Task API",
@@ -33,22 +33,22 @@ def root():
         "endpoints": ["/tasks"]
     }
 
-@app.get("/health")
+@app.get("/health", summary="Health check", description="Returns server status")
 def health():
     return {"status": "ok"}
 
-@app.get("/tasks")
+@app.get("/tasks", summary="List tasks", description="Returns all tasks")
 def get_tasks():
     return tasks
 
-@app.get("/tasks/{task_id}")
+@app.get("/tasks/{task_id}", summary="Get one task", description="Returns a single task by id, or 404 if not found")
 def get_task(task_id: int):
     for task in tasks:
         if task["id"] == task_id:
             return task
     raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
 
-@app.post("/tasks", status_code=201)
+@app.post("/tasks", status_code=201, summary="Create task", description="Creates a new task with a title; done defaults to false")
 def create_task(task: TaskCreate):
     if not task.title.strip():
         return JSONResponse(
@@ -61,7 +61,7 @@ def create_task(task: TaskCreate):
     tasks.append(new_task)
     return new_task
 
-@app.put("/tasks/{task_id}")
+@app.put("/tasks/{task_id}", summary="Update task", description="Replaces a task's title and done status")
 def update_task(task_id: int, task: TaskUpdate):
     if not task.title.strip():
         return JSONResponse(
@@ -77,7 +77,7 @@ def update_task(task_id: int, task: TaskUpdate):
 
     raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
 
-@app.delete("/tasks/{task_id}", status_code=204)
+@app.delete("/tasks/{task_id}", status_code=204, summary="Delete task", description="Removes a task by id")
 def delete_task(task_id: int):
     for t in tasks:
         if t["id"] == task_id:
